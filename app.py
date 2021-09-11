@@ -1,10 +1,8 @@
-#conda install -c plotly plotly=4.8.2
-#pip install mplfinance
-
 import streamlit as st
 import pandas as pd
 import datetime as datetime
 import pandas_datareader
+import datetime
 import plotly.graph_objects as go
 from PIL import Image
 
@@ -18,9 +16,28 @@ st.image(image, use_column_width=True)
 
 st.sidebar.header("User Input")
 
+#get_data →　csv data
+def crypto_get():
+    start_days = datetime.datetime(2020, 1, 1)
+    end_days = datetime.datetime.now()
+    # BTC get
+    df_btc = pandas_datareader.DataReader('BTC-JPY', 'yahoo', start_days, end_days)
+    df_btc.to_csv('BTC.csv')
+    # ETH get
+    df_eth = pandas_datareader.DataReader('ETH-JPY', 'yahoo', start_days, end_days)
+    df_eth.to_csv('ETH.csv')
+    # DOGE get
+    df_doge = pandas_datareader.DataReader('DOGE-JPY', 'yahoo', start_days, end_days)
+    df_doge.to_csv('DOGE.csv')
+
+crypto_get()
+
 def get_input():
+    dt_now = datetime.datetime.now()
+    end_days = dt_now.date()
+
     start_date = st.sidebar.text_input("Strat Date", "2021-01-01")
-    end_date = st.sidebar.text_input("End Date", "2021-09-01")
+    end_date = st.sidebar.text_input("End Date", end_days)
     crypto_symbol = st.sidebar.text_input("Crypto Symbol", "BTC")
     return start_date, end_date, crypto_symbol
 
@@ -39,17 +56,12 @@ def get_data(symbol, start, end):
     symbol = symbol.upper()
     if symbol == "BTC":
         df = pd.read_csv("BTC.csv")
-        # df = pandas_datareader.data.DataReader('BTC', 'yahoo')
-
     elif symbol == "ETH":
         df = pd.read_csv("ETH.csv")
-        # df = pandas_datareader.data.DataReader('ETH', 'yahoo')
     elif symbol == "DOGE":
         df = pd.read_csv("DOGE.csv")
-        # df = pandas_datareader.data.DataReader('DOGE', 'yahoo')
     else:
         df = pd.DataFrame(columns=['Date', 'Close', 'Open', 'Volume', 'Adj Close'])
-
     start = pd.to_datetime(start)
     end = pd.to_datetime(end)
 
