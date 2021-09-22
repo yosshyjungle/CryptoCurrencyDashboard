@@ -1,10 +1,15 @@
 import streamlit as st
+import numpy as np
 import pandas as pd
 import datetime as datetime
 import pandas_datareader
 import datetime
 import plotly.graph_objects as go
 from PIL import Image
+import sklearn
+import sklearn.linear_model
+import sklearn.model_selection
+import yfinance as yf
 
 st.write("""
 # Crypto Currency Dashboard Application
@@ -30,6 +35,9 @@ def crypto_get():
     # DOGE get
     df_doge = pandas_datareader.DataReader('DOGE-JPY', 'yahoo', start_days, end_days)
     df_doge.to_csv('DOGE.csv')
+    # Tezos get
+    df_doge = pandas_datareader.DataReader('XTZ-JPY', 'yahoo', start_days, end_days)
+    df_doge.to_csv('XTZ.csv')
 
 crypto_get()
 
@@ -50,6 +58,8 @@ def get_crypto_name(symbol):
         return "Etherium"
     elif symbol == "DOGE":
         return "Dogecoin"
+    elif symbol == "XTZ":
+        return "TEZOS"
     else:
         return "None"
 
@@ -61,6 +71,8 @@ def get_data(symbol, start, end):
         df = pd.read_csv("ETH.csv")
     elif symbol == "DOGE":
         df = pd.read_csv("DOGE.csv")
+    elif symbol == "XTZ":
+        df = pd.read_csv("XTZ.csv")
     else:
         df = pd.DataFrame(columns=['Date', 'Close', 'Open', 'Volume', 'Adj Close'])
     start = pd.to_datetime(start)
@@ -105,6 +117,56 @@ st.bar_chart(df['Volume'])
 st.header(crypto_name + " Candle Stick")
 st.plotly_chart(fig)
 
+df['label'] = df['Close'].shift(-30)
 
+st.header(crypto_name + ' Predict one month later.')
+def predict_crypto():
+    # 機械学習(マシンラーニング)
+    X = np.array(df.drop(['label'], axis=1))
+    X = sklearn.preprocessing.scale(X)
+    predict_data = X[-30:]
+    X = X[:-30]
+    y = np.array(df['label'])
+    y = y[:-30]
+    #データの分割
+    X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(
+        X, y, test_size = 0.2)
+    # 訓練データを用いて学習する
+    model = sklearn.linear_model.LinearRegression()
+    model.fit(X_train,y_train)
+
+    accuracy = model.score(X_test, y_test)
+    #小数点第一位で四捨五入
+    st.write(f'正答率は{round((accuracy) * 100, 1)}%です。')
+    #accuracyより信頼度を表示
+    if accuracy > 0.75:
+        st.write('信頼度：高')
+    elif accuracy > 0.5:
+        st.write('信頼度：中')
+    else:
+        st.write('信頼度：低')
+    st.write('オレンジの線（Predict）が予測値です。')
+
+    # 検証データーを用いて検証してみる
+    predicted_data = model.predict(predict_data)
+    df['Predict'] = np.nan
+    last_date = df.iloc[-1].name
+    one_day = 86400
+    next_unix = last_date.timestamp() + one_day
+
+    for data in predicted_data:
+        next_date = datetime.datetime.fromtimestamp(next_unix)
+        next_unix += one_day
+        df.loc[next_date] = np.append([np.nan]* (len(df.columns)-1), data)
+
+    df['Close'].plot(figsize=(15,6), color="green")
+    df['Predict'].plot(figsize=(15,6), color="orange")
+
+    df_stock3 = df[['Close', 'Predict']]
+    st.line_chart(df_stock3)
+
+# ボタンを押すとstock_predict()が発動
+if st.button('予測する'):
+    predict_crypto()
 
 
