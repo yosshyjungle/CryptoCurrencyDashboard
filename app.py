@@ -195,3 +195,4 @@ if st.button('予測する'):
     predict_crypto()
 
 
+st.write('Copyright © 2021 Tomoyuki Yoshikawa. All Rights Reserved.')
