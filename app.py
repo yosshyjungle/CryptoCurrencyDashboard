@@ -13,13 +13,14 @@ import yfinance as yf
 
 st.write("""
 # Crypto Currency Dashboard Application
-Visually show data on crypto (BTC-JPY, DOGE-JPY, & ETH-JPY) 
+Visually show data on crypto (BTC-JPY, DOGE-JPY, ETH-JPY, XTZ-JPY, XRP-JPY, LTC-JPY, XEM-JPY) 
 """)
 
 image = Image.open('crypto_image3.PNG')
 st.image(image, use_column_width=True)
 
 st.sidebar.header("User Input")
+
 
 
 #get_data →　csv data
@@ -36,8 +37,18 @@ def crypto_get():
     df_doge = pandas_datareader.DataReader('DOGE-JPY', 'yahoo', start_days, end_days)
     df_doge.to_csv('DOGE.csv')
     # Tezos get
-    df_doge = pandas_datareader.DataReader('XTZ-JPY', 'yahoo', start_days, end_days)
-    df_doge.to_csv('XTZ.csv')
+    df_xtz = pandas_datareader.DataReader('XTZ-JPY', 'yahoo', start_days, end_days)
+    df_xtz.to_csv('XTZ.csv')
+    # XRP(ripple) get
+    df_xrp = pandas_datareader.DataReader('XRP-JPY', 'yahoo', start_days, end_days)
+    df_xrp.to_csv('XRP.csv')
+    # LTC(Litecoin) get
+    df_ltc = pandas_datareader.DataReader('LTC-JPY', 'yahoo', start_days, end_days)
+    df_ltc.to_csv('LTC.csv')
+    # NEM get
+    df_xem = pandas_datareader.DataReader('XEM-JPY', 'yahoo', start_days, end_days)
+    df_xem.to_csv('XEM.csv')
+
 
 crypto_get()
 
@@ -47,6 +58,8 @@ def get_input():
 
     start_date = st.sidebar.text_input("Strat Date", "2021-01-01")
     end_date = st.sidebar.text_input("End Date", end_days)
+    st.sidebar.write("Enter the cryptocurrency ticker symbol.")
+    st.sidebar.write("BTC, ETH, DOGE, XTZ, XRP, LTC, XEM")
     crypto_symbol = st.sidebar.text_input("Crypto Symbol", "BTC")
     return start_date, end_date, crypto_symbol
 
@@ -60,6 +73,12 @@ def get_crypto_name(symbol):
         return "Dogecoin"
     elif symbol == "XTZ":
         return "TEZOS"
+    elif symbol == "XRP":
+        return "RIPPLE"
+    elif symbol == "LTC":
+        return "Litecoin"
+    elif symbol == "XEM":
+        return "NEM"
     else:
         return "None"
 
@@ -73,6 +92,12 @@ def get_data(symbol, start, end):
         df = pd.read_csv("DOGE.csv")
     elif symbol == "XTZ":
         df = pd.read_csv("XTZ.csv")
+    elif symbol == "XRP":
+        df = pd.read_csv("XRP.csv")
+    elif symbol == "LTC":
+        df = pd.read_csv("LTC.csv")
+    elif symbol == "XEM":
+        df = pd.read_csv("XEM.csv")
     else:
         df = pd.DataFrame(columns=['Date', 'Close', 'Open', 'Volume', 'Adj Close'])
     start = pd.to_datetime(start)
