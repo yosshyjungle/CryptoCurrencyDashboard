@@ -8,4 +8,7 @@ scikit-learn
 scipy
 sklearn
 yfinance
+mplfinance
+altair
+
 
