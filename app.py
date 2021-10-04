@@ -22,8 +22,8 @@ st.image(image, use_column_width=True)
 st.sidebar.header("User Input")
 
 
-
 #get_data →　csv data
+@st.cache
 def crypto_get():
     start_days = datetime.datetime(2020, 1, 1)
     end_days = datetime.datetime.now()
@@ -49,14 +49,13 @@ def crypto_get():
     df_xem = pandas_datareader.DataReader('XEM-JPY', 'yahoo', start_days, end_days)
     df_xem.to_csv('XEM.csv')
 
-
 crypto_get()
 
 def get_input():
     dt_now = datetime.datetime.now()
     end_days = dt_now.date()
 
-    start_date = st.sidebar.text_input("Strat Date", "2021-01-01")
+    start_date = st.sidebar.text_input("Strat Date", "2020-01-01")
     end_date = st.sidebar.text_input("End Date", end_days)
     st.sidebar.write("Enter the cryptocurrency ticker symbol.")
     st.sidebar.write("BTC, ETH, DOGE, XTZ, XRP, LTC, XEM")
@@ -128,10 +127,10 @@ fig = go.Figure(
 
 st.header(crypto_name + " Data")
 
-st.write(df)
+st.dataframe(df.sort_index(ascending=False))
 
 st.header(crypto_name + " Data Statistics")
-st.write(df.describe())
+st.dataframe(df.describe())
 
 st.header(crypto_name + " Close Price")
 st.line_chart(df['Close'])
@@ -140,7 +139,7 @@ st.header(crypto_name + " Volume")
 st.bar_chart(df['Volume'])
 
 st.header(crypto_name + " Candle Stick")
-st.plotly_chart(fig)
+st.plotly_chart(fig, use_column_width=True)
 
 df['label'] = df['Close'].shift(-30)
 
@@ -194,5 +193,5 @@ def predict_crypto():
 if st.button('予測する'):
     predict_crypto()
 
-
 st.write('Copyright © 2021 Tomoyuki Yoshikawa. All Rights Reserved.')
+
